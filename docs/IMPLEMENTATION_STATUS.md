@@ -16,6 +16,7 @@
 
 ## Espacio web remoto — preparado, sin publicar todavía
 
+- Hito de código publicado: `7fafc40 feat: add realtime Supabase design workspace` en `Safagix/fashion-cad-studio:main`.
 - Se creó el proyecto Supabase `fashion-cad-studio` en plan Free, región São Paulo. No se copiaron libros, OCR, LanceDB, SQLite ni modelos locales.
 - La migración `supabase/migrations/20260915164824_fashion_cad_realtime_workspace.sql` crea `design_projects`, `design_revisions` y `knowledge_packets`; RLS está habilitado y las tres tablas se verificaron presentes en la base remota.
 - Las tablas no se exponen automáticamente; sólo el rol autenticado tiene permisos explícitos. Las revisiones se incrementan mediante `apply_design_revision`, y `design_projects`/`design_revisions` están en la publicación Realtime.

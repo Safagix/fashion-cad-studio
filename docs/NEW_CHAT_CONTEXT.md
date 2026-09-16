@@ -18,6 +18,7 @@ Continuá Fashion CAD Studio en D:\Digital Lab\FashionCAD. Leé primero docs\NEW
 ## Estado al cierre de este hito
 
 - Producción GitHub: `https://github.com/Safagix/fashion-cad-studio`, rama `main`, publicada desde la rama local `fashion-cad-studio`. `Safagix/ai-projects:fashion-cad-studio` queda como historial; no mezclarlo con su `main` ajeno.
+- Último hito propio enviado a producción: `7fafc40 feat: add realtime Supabase design workspace`. Comprobarlo con `git log -3 --oneline`; no incluir en otro commit los cambios de usuario indicados abajo.
 - Antes de editar, revisar `git status --short` y `git log -3 --oneline`. Hay cambios de usuario sin confirmar en `mockups.py`, `patterns.py` y `tests/test_api.py`: preservarlos y no incluirlos en un commit ajeno.
 - La UI ya no es decorativa: el chat local transforma órdenes conocidas en operaciones/revisiones persistentes. QA de navegador verificado: crear bolso con “bolsillo, cierre, correa; nylon reciclado; 355 × 245 × 25 mm” creó revisión 8 y habilitó exportaciones; cambiar a Híbrido creó revisión 9.
 - El selector de modo se persiste. Híbrido/cloud no envían activos ni simulan una IA remota; conservan la barrera de consentimiento.
