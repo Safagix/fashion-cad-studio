@@ -17,8 +17,8 @@ Continuá Fashion CAD Studio en D:\Digital Lab\FashionCAD. Leé primero docs\NEW
 
 ## Estado al cierre de este hito
 
-- Rama local/remota: `fashion-cad-studio` de `https://github.com/Safagix/ai-projects`.
-- El commit más reciente de esta rama es `feat: add local OCR ingestion and delivery context`. Revisar `git status --short` y `git log -3 --oneline`; debe estar enviado a `ai-projects/fashion-cad-studio` antes de continuar.
+- Producción GitHub: `https://github.com/Safagix/fashion-cad-studio`, rama `main`, publicada desde la rama local `fashion-cad-studio`. `Safagix/ai-projects:fashion-cad-studio` queda como historial; no mezclarlo con su `main` ajeno.
+- Antes de editar, revisar `git status --short` y `git log -3 --oneline`. Hay cambios de usuario sin confirmar en `mockups.py`, `patterns.py` y `tests/test_api.py`: preservarlos y no incluirlos en un commit ajeno.
 - La UI ya no es decorativa: el chat local transforma órdenes conocidas en operaciones/revisiones persistentes. QA de navegador verificado: crear bolso con “bolsillo, cierre, correa; nylon reciclado; 355 × 245 × 25 mm” creó revisión 8 y habilitó exportaciones; cambiar a Híbrido creó revisión 9.
 - El selector de modo se persiste. Híbrido/cloud no envían activos ni simulan una IA remota; conservan la barrera de consentimiento.
 - `GET /` responde salud/info de API (el 404 de la captura era raíz API sin endpoint, no un fallo de Uvicorn). `scripts\run-api.ps1` ahora arranca sin watcher pesado; para recarga usar `-Reload`. Usar una segunda terminal para `scripts\run-web.ps1`.
@@ -32,6 +32,7 @@ apps/api/tests/              pruebas API
 apps/studio-web/             React/Vite/Three.js
 apps/mcp-server/             MCP stdio TypeScript cerrado
 mcp-configs/                 plantilla de conexión MCP local por usuario
+supabase/migrations/         esquema remoto versionado, sin secretos
 scripts/                     arranque, importación, benchmark y verificación
 KNOWLEDGE_BASE_STUDIO/       biblioteca privada (ignorada por Git)
 data/sqlite + data/lancedb/  estado local del usuario (ignorado por Git)
@@ -87,11 +88,12 @@ Luego reconstruir BGE desde Studio o `POST /api/rag/semantic/reindex`. No correr
 
 ## GitHub y Vercel
 
-- GitHub: código/documentación ya publicados en la rama aislada `fashion-cad-studio` de `Safagix/ai-projects`; no mezclar con `main` de ese repo sin instrucción expresa porque tiene historia ajena.
-- Vercel: `vercel.json` y `.env.example` preparan solamente la SPA. `VITE_FASHION_CAD_API` debe ser una URL HTTPS de API pública y nunca un secreto.
-- No desplegar BGE-M3, SQLite local ni `KNOWLEDGE_BASE_STUDIO` a Vercel. El modelo excede el límite de una función Vercel; una web pública funcional requiere backend persistente separado y CORS/identidad/almacenamiento decididos.
-- La CLI Vercel no estaba autenticada. Si se va a publicar desde el navegador, pedir confirmación al usuario **justo antes** de pulsar Deploy e indicar que se hará pública la SPA/código, no la biblioteca o modelos.
-- MCP local funciona hoy por stdio. ChatGPT requiere un MCP remoto autenticado y no puede alcanzar `localhost`; no publicar un relay anónimo. Elegir identidad/base de datos y aislamiento por usuario antes de crear `/mcp` remoto.
+- GitHub de producción: `Safagix/fashion-cad-studio:main`. Vercel ya está preparado para importar ese repositorio con nombre `fashion-cad-studio`; no desplegar la vieja importación `ai-projects`.
+- Supabase: proyecto Free en São Paulo creado. La migración versionada crea tres tablas privadas por `auth.uid()`, RLS, grants sólo a `authenticated`, RPC invoker para revisión atómica y publicación Realtime. Se verificaron las tres tablas; no se subieron libros ni modelos.
+- Studio Web conserva el local si no hay variables Supabase. Con `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` (variables públicas, nunca service role) muestra registro email/contraseña, proyectos y revisiones Realtime y búsqueda de `knowledge_packets` aprobados. `apps/studio-web/.env.local` es local/ignorado.
+- Antes de publicar: con confirmación inmediata, cargar URL y clave **publicable** en Vercel, pulsar Deploy y después añadir la URL Vercel a Auth Redirect URLs de Supabase. La clave secreta no puede salir del panel de Supabase.
+- No desplegar BGE-M3, SQLite local ni `KNOWLEDGE_BASE_STUDIO` a Vercel. El modelo excede funciones Vercel y la biblioteca permanece privada.
+- MCP local funciona por stdio. ChatGPT sigue necesitando un MCP remoto Streamable HTTP con OAuth y aislamiento por usuario; el esquema Realtime ya es su destino seguro, pero el endpoint no está implementado ni anunciado.
 
 ## Verificación y entrega
 
@@ -114,4 +116,5 @@ npm --prefix apps\studio-web run build
 1. Planificar OCR por libro con progreso/reanudación antes de iniciar `Bag Design` (126 páginas) o `Patternmaking` (848); no usar una importación monolítica en esta CPU.
 2. Optimizar el rebuild BGE completo antes de iniciarlo sobre 933+ fragmentos; el job medido es ~80 min. Mantener FTS disponible y registrar una medición real si se cambia batching/modelo/hardware.
 3. Revisar que el commit/push de este hito exista y sustituir el hash exacto en esta sección si faltara.
-4. Para una web pública, solicitar al usuario elegir/proveer un backend persistente. Desplegar la SPA en Vercel sólo tras la confirmación inmediata de publicación.
+4. Completar el despliegue Vercel con las dos variables públicas Supabase y validar registro → diseño → segunda sesión Realtime. Pedir confirmación inmediata antes de transmitir la clave publicable a Vercel y de pulsar Deploy.
+5. Implementar MCP remoto autenticado sólo tras verificar la modalidad de ChatGPT/OAuth; no usar localhost, túnel abierto ni service role.

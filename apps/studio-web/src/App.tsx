@@ -1,5 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { api, artifactUrl } from './api'
+import RemoteStudio from './RemoteStudio'
+import { remoteEnabled } from './remote'
 import type { Brief, Design, Job, ProductType, RagResult, StudioMode } from './types'
 
 const DesignScene = lazy(() => import('./Scene'))
@@ -9,7 +11,7 @@ const modes: Array<{ id: StudioMode; label: string; note: string }> = [
   { id: 'cloud_creative', label: 'CLOUD / CREATIVO', note: 'Máxima exploración visual.' },
 ]
 
-export default function App() {
+function LocalStudio() {
   const [designs, setDesigns] = useState<Design[]>([])
   const [active, setActive] = useState<Design | null>(null)
   const [name, setName] = useState('Bolso laptop — estudio 01')
@@ -231,4 +233,8 @@ export default function App() {
       <section className="knowledge"><p className="panel-label">CONOCIMIENTO LOCAL</p><div className="rag-engine"><button className={ragEngine === 'fts' ? 'selected' : ''} onClick={() => setRagEngine('fts')}>FTS</button><button className={ragEngine === 'semantic' ? 'selected' : ''} onClick={() => setRagEngine('semantic')}>BGE-M3</button></div><div><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Buscar material o técnica" /><button onClick={lookup}>BUSCAR</button></div><button className="reindex" disabled={semanticJob?.status === 'queued' || semanticJob?.status === 'running'} onClick={startSemanticReindex}>RECONSTRUIR ÍNDICE SEMÁNTICO</button>{semanticJob && <div className="job-status"><b>{semanticJob.status.toUpperCase()}</b><span>{semanticJob.total ? `${semanticJob.progress}/${semanticJob.total}` : semanticJob.message}</span>{['queued', 'running'].includes(semanticJob.status) && <button onClick={cancelSemanticJob}>CANCELAR</button>}</div>}{sources.map(source => <article key={source.chunk_id ?? `${source.title}-${source.source}`}><b>{source.title}</b><small>{source.source}{source.source_page ? ` · pág. ${source.source_page}` : ''}{source.chunk_number ? ` · frag. ${source.chunk_number}` : ''}</small><p>{source.excerpt}</p></article>)}</section>
     </aside>
   </main>
+}
+
+export default function App() {
+  return remoteEnabled ? <RemoteStudio /> : <LocalStudio />
 }
